@@ -14,6 +14,7 @@
   <meta property="og:image" content="https://ar.artcollision.ca/img/poster.png">
   <meta property="og:url" content="https://ar.artcollision.ca">
   <link rel="preload" href="/models/ArtCollision_Logo_AR.glb" as="fetch" type="model/gltf-binary" crossorigin>
+  <script>self.ModelViewerElement = self.ModelViewerElement || {}; self.ModelViewerElement.dracoDecoderLocation = "/vendor/draco/";</script>
   <script type="module" src="/vendor/model-viewer.min.js"></script>
   <style>
     :root {
@@ -45,10 +46,11 @@
     model-viewer {
       position: absolute; inset: 0; width: 100%; height: 100%;
       background: transparent; --poster-color: transparent;
+      background-size: contain;
       --progress-bar-color: transparent;
     }
     .progress {
-      position: absolute; left: 50%; bottom: 24px; width: 160px; height: 3px; margin-left: -80px;
+      position: absolute; left: 50%; top: 12px; width: 160px; height: 3px; margin-left: -80px;
       background: var(--line); border-radius: 3px; overflow: hidden; transition: opacity .4s;
     }
     .progress > span { display: block; height: 100%; width: 0; background: var(--grad); transition: width .2s; }
@@ -114,7 +116,7 @@
       min-camera-orbit="auto 20deg auto" max-camera-orbit="auto 160deg auto"
       environment-image="neutral" exposure="1.05"
       shadow-intensity="0.6" shadow-softness="1"
-      loading="eager" reveal="auto">
+      loading="eager" reveal="auto" poster="/img/poster.png">
       <button slot="ar-button" class="ar-btn" id="arBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="m3 7 9 5 9-5M12 12v10"/></svg>
         <span data-i18n="ar">View in your space</span>
