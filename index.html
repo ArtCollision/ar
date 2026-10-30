@@ -12,10 +12,20 @@
       const ua = navigator.userAgent;
       const inApp = /FBAN|FBAV|FB_IAB|Instagram|LinkedInApp|Snapchat|TikTok|Line\/|MicroMessenger|; wv\)/i.test(ua);
       if (new URLSearchParams(location.search).has("view") || inApp) return;
+      // Launch AR only once per visit: when the person closes AR (X) or reloads,
+      // they stay on this home page.
+      try { if (sessionStorage.getItem("arLaunched")) return; sessionStorage.setItem("arLaunched", "1"); } catch (e) {}
       const origin = location.origin;
       const isIOS = /iPhone|iPod|iPad/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
       if (isIOS) {
-        location.href = origin + "/models/ArtCollision_Logo_AR.usdz";
+        // AR Quick Look link (rel="ar"): opens on top of this page, so closing it returns here
+        const a = document.createElement("a");
+        a.rel = "ar";
+        a.href = origin + "/models/ArtCollision_Logo_AR.usdz";
+        a.style.display = "none";
+        a.appendChild(document.createElement("img"));
+        document.documentElement.appendChild(a);
+        a.click();
       } else if (/Android/i.test(ua)) {
         location.href =
           "intent://arvr.google.com/scene-viewer/1.0?file=" +
