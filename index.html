@@ -145,6 +145,28 @@
   </section>
 
   <script>
+    // ---- Auto-launch AR when the page is opened from the QR code ----
+    // iPhone/iPad -> AR Quick Look (.usdz) · Android -> Google Scene Viewer (.glb)
+    // Add ?view=1 to the address to stay on this page.
+    (function () {
+      const ua = navigator.userAgent;
+      const inApp = /FBAN|FBAV|FB_IAB|Instagram|LinkedInApp|Snapchat|TikTok|Line\/|MicroMessenger|; wv\)/i.test(ua);
+      if (new URLSearchParams(location.search).has("view") || inApp) return;
+      const origin = location.origin;
+      const isIOS = /iPhone|iPod|iPad/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      if (isIOS) {
+        location.href = origin + "/models/ArtCollision_Logo_AR.usdz";
+      } else if (/Android/i.test(ua)) {
+        location.href =
+          "intent://arvr.google.com/scene-viewer/1.0?file=" +
+          encodeURIComponent(origin + "/models/ArtCollision_Logo_AR.glb") +
+          "&mode=ar_preferred&title=" + encodeURIComponent("Art Collision") +
+          "#Intent;scheme=https;package=com.google.android.googlequicksearchbox;" +
+          "action=android.intent.action.VIEW;S.browser_fallback_url=" +
+          encodeURIComponent(origin + "/?view=1") + ";end;";
+      }
+    })();
+
     // Simple EN / FR switch based on the phone's language
     const fr = (navigator.language || "").toLowerCase().startsWith("fr");
     const T = {
