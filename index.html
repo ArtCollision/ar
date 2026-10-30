@@ -59,9 +59,15 @@
       display: flex; flex-direction: column; min-height: 100dvh;
     }
     header {
-      padding: max(16px, env(safe-area-inset-top)) 16px 0;
+      padding: max(12px, env(safe-area-inset-top)) 16px 0;
       text-align: center;
     }
+    .topbar { display: flex; align-items: center; justify-content: space-between; min-height: 44px; }
+    .brand { display: inline-flex; align-items: center; border-radius: 8px; }
+    .brand img { height: 44px; width: auto; display: block; }
+    .brand:focus-visible { outline: 2px solid var(--navy); outline-offset: 4px; }
+    .site-link { font-size: 13px; font-weight: 600; color: var(--navy); text-decoration: none; padding: 8px 0 8px 12px; }
+    .site-link:hover { text-decoration: underline; }
     .name { margin: 8px 0 0; font-size: 20px; font-weight: 700; letter-spacing: .04em; color: var(--navy); }
     .role { margin: 2px 0 0; font-size: 12px; font-weight: 600; letter-spacing: .08em; color: var(--red); text-transform: uppercase; }
 
@@ -72,12 +78,22 @@
       background-size: contain;
       --progress-bar-color: transparent;
     }
-    .progress {
-      position: absolute; left: 50%; top: 12px; width: 160px; height: 3px; margin-left: -80px;
-      background: var(--line); border-radius: 3px; overflow: hidden; transition: opacity .4s;
+    /* 3D loading indicator */
+    .loader {
+      position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%);
+      width: min(260px, 80%); padding: 12px 16px 14px; border-radius: 14px;
+      background: rgba(255,255,255,.92); border: 1px solid var(--line);
+      box-shadow: 0 6px 20px rgba(26,43,109,.10);
+      text-align: center; transition: opacity .45s, transform .45s; z-index: 2; pointer-events: none;
     }
-    .progress > span { display: block; height: 100%; width: 0; background: var(--grad); transition: width .2s; }
-    .progress.done { opacity: 0; }
+    .loader p { margin: 0 0 8px; font-size: 13px; font-weight: 600; color: var(--navy); }
+    .loader p span { color: var(--muted); font-weight: 600; margin-left: 4px; }
+    .track { height: 6px; border-radius: 6px; background: var(--line); overflow: hidden; position: relative; }
+    .fill { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--grad); border-radius: 6px; transition: width .25s ease; }
+    .loader.waiting .fill { width: 35%; animation: slide 1.2s ease-in-out infinite; }
+    @keyframes slide { 0% { left: -35%; } 100% { left: 100%; } }
+    .loader.done { opacity: 0; transform: translateX(-50%) translateY(8px); }
+    .loader.error .fill { background: var(--red); width: 100%; }
 
     .actions {
       padding: 12px 16px max(20px, env(safe-area-inset-bottom));
@@ -123,6 +139,12 @@
 </head>
 <body>
   <header>
+    <div class="topbar">
+      <a class="brand" href="https://www.artcollision.ca/" aria-label="Art Collision – www.artcollision.ca">
+        <img src="/img/logo-artcollision.png" alt="Art Collision" width="72" height="44">
+      </a>
+      <a class="site-link" href="https://www.artcollision.ca/">artcollision.ca →</a>
+    </div>
     <h1 class="name">CANDICE DAN</h1>
     <p class="role" data-i18n="role">Founder &amp; Creative Director</p>
   </header>
@@ -139,13 +161,17 @@
       min-camera-orbit="auto 20deg auto" max-camera-orbit="auto 160deg auto"
       environment-image="neutral" exposure="1.05"
       shadow-intensity="0.6" shadow-softness="1"
-      loading="eager" reveal="auto" poster="/img/poster.png">
+      loading="eager" reveal="auto" poster="/img/poster-logo.png">
       <button slot="ar-button" class="ar-btn" id="arBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="m3 7 9 5 9-5M12 12v10"/></svg>
         <span data-i18n="ar">View in your space</span>
       </button>
-      <div class="progress" slot="progress-bar" id="progress"><span></span></div>
+      <div slot="progress-bar"></div>
     </model-viewer>
+    <div class="loader waiting" id="loader" role="status" aria-live="polite">
+      <p><span data-i18n="loading" style="color:inherit;margin:0">Loading the 3D model…</span><span id="pct"></span></p>
+      <div class="track"><div class="fill" id="fill"></div></div>
+    </div>
   </main>
 
   <section class="actions">
@@ -179,7 +205,8 @@
       inapp: "Pour la réalité augmentée, ouvrez cette page dans <strong>Safari</strong> ou <strong>Chrome</strong>.",
       deskTitle: "Voyez-le chez vous",
       deskText: "Scannez avec l'appareil photo de votre téléphone pour placer le logo en réalité augmentée.",
-      email: "Courriel", call: "Appeler", save: "Ajouter aux contacts"
+      email: "Courriel", call: "Appeler", save: "Ajouter aux contacts",
+      loading: "Chargement du modèle 3D…", loadError: "Le modèle 3D n'a pas pu se charger. Rechargez la page."
     };
     if (fr) {
       document.documentElement.lang = "fr";
@@ -191,15 +218,24 @@
       document.getElementById("inAppHint").hidden = false;
     }
 
-    // Loading bar
+    // 3D loading indicator: animated while the viewer starts, then a real percentage
     const mv = document.getElementById("mv");
-    const bar = document.querySelector("#progress > span");
+    const loader = document.getElementById("loader"), fill = document.getElementById("fill"), pct = document.getElementById("pct");
+    let finished = false;
+    function finish() { if (finished) return; finished = true; fill.style.width = "100%"; pct.textContent = ""; setTimeout(() => loader.classList.add("done"), 250); }
     mv.addEventListener("progress", e => {
       const p = e.detail.totalProgress;
-      bar.style.width = (p * 100) + "%";
-      if (p >= 1) document.getElementById("progress").classList.add("done");
+      if (finished || p <= 0) return;
+      loader.classList.remove("waiting");
+      fill.style.width = Math.round(p * 100) + "%";
+      pct.textContent = Math.round(p * 100) + " %";
+      if (p >= 1) finish();
     });
-    mv.addEventListener("load", () => document.getElementById("progress").classList.add("done"));
+    mv.addEventListener("load", finish);
+    mv.addEventListener("error", () => {
+      loader.classList.remove("waiting"); loader.classList.add("error");
+      loader.querySelector("p").textContent = fr ? T.loadError : "The 3D model couldn't load. Please reload the page.";
+    });
 
     // Keep the whole logo visible on narrow (portrait) screens
     function fit() {
