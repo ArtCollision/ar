@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Art Collision · AR</title>
+  <meta name="description" content="Art Collision – Candice Dan, Founder & Creative Director. See the Art Collision logo in augmented reality.">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="icon" type="image/png" sizes="64x64" href="/img/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32.png">
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+  <meta property="og:title" content="Art Collision · AR">
+  <meta property="og:description" content="See the Art Collision logo come to life in your space.">
+  <meta property="og:image" content="https://ar.artcollision.ca/img/poster.png">
+  <meta property="og:url" content="https://ar.artcollision.ca">
+  <link rel="preload" href="/models/ArtCollision_Logo_AR.glb" as="fetch" type="model/gltf-binary" crossorigin>
+  <script type="module" src="/vendor/model-viewer.min.js"></script>
+  <style>
+    :root {
+      --navy: #1a2b6d;
+      --red: #b12f2a;
+      --ink: #1d1d24;
+      --muted: #6b6b78;
+      --bg: #ffffff;
+      --bg2: #f4f3f8;
+      --line: #e6e4ee;
+      --grad: linear-gradient(90deg, #2b3a80 0%, #6a2f63 50%, #bc1f2f 100%);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
+    body {
+      font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: var(--ink);
+      background: radial-gradient(120% 80% at 50% 35%, var(--bg) 40%, var(--bg2) 100%);
+      display: flex; flex-direction: column; min-height: 100dvh;
+    }
+    header {
+      padding: max(16px, env(safe-area-inset-top)) 16px 0;
+      text-align: center;
+    }
+    .name { margin: 8px 0 0; font-size: 20px; font-weight: 700; letter-spacing: .04em; color: var(--navy); }
+    .role { margin: 2px 0 0; font-size: 12px; font-weight: 600; letter-spacing: .08em; color: var(--red); text-transform: uppercase; }
+
+    main { flex: 1; position: relative; min-height: 340px; }
+    model-viewer {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      background: transparent; --poster-color: transparent;
+      --progress-bar-color: transparent;
+    }
+    .progress {
+      position: absolute; left: 50%; bottom: 24px; width: 160px; height: 3px; margin-left: -80px;
+      background: var(--line); border-radius: 3px; overflow: hidden; transition: opacity .4s;
+    }
+    .progress > span { display: block; height: 100%; width: 0; background: var(--grad); transition: width .2s; }
+    .progress.done { opacity: 0; }
+
+    .actions {
+      padding: 12px 16px max(20px, env(safe-area-inset-bottom));
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+    }
+    .ar-btn {
+      appearance: none; border: 0; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 15px 26px; border-radius: 999px;
+      background: var(--grad); color: #fff;
+      font: inherit; font-size: 16px; font-weight: 700; letter-spacing: .02em; white-space: nowrap;
+      box-shadow: 0 8px 24px rgba(106, 47, 99, .28);
+    }
+    .ar-btn svg { width: 22px; height: 22px; flex: none; }
+    .ar-btn:active { transform: scale(.98); }
+    model-viewer .ar-btn { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); }
+    model-viewer .ar-btn:active { transform: translateX(-50%) scale(.98); }
+
+    .hint { margin: 0; font-size: 13px; color: var(--muted); text-align: center; max-width: 360px; }
+    .hint strong { color: var(--ink); }
+
+    .desk {
+      display: none; align-items: center; gap: 16px;
+      padding: 14px 18px; border: 1px solid var(--line); border-radius: 16px; background: #fff;
+    }
+    .desk img { width: 96px; height: 96px; }
+    .desk p { margin: 0; font-size: 14px; color: var(--muted); max-width: 230px; }
+    .desk p strong { display: block; color: var(--ink); margin-bottom: 4px; }
+
+    .contact { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 9px 14px; border-radius: 999px; border: 1px solid var(--line);
+      background: #fff; color: var(--ink); text-decoration: none; font-size: 14px; font-weight: 600;
+    }
+    .chip svg { width: 16px; height: 16px; color: var(--navy); }
+    .chip:hover { border-color: #cfcbe0; }
+
+    @media (pointer: fine) and (min-width: 760px) {
+      .desk { display: flex; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1 class="name">CANDICE DAN</h1>
+    <p class="role" data-i18n="role">Founder &amp; Creative Director</p>
+  </header>
+
+  <main>
+    <model-viewer id="mv"
+      src="/models/ArtCollision_Logo_AR.glb"
+      ios-src="/models/ArtCollision_Logo_AR.usdz"
+      alt="Art Collision animated 3D logo"
+      ar ar-modes="scene-viewer quick-look webxr" ar-scale="auto" ar-placement="floor"
+      camera-controls touch-action="pan-y" interaction-prompt="none"
+      autoplay animation-name="ArtCollision_Loop"
+      camera-orbit="0deg 84deg auto"
+      min-camera-orbit="auto 20deg auto" max-camera-orbit="auto 160deg auto"
+      environment-image="neutral" exposure="1.05"
+      shadow-intensity="0.6" shadow-softness="1"
+      loading="eager" reveal="auto">
+      <button slot="ar-button" class="ar-btn" id="arBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="m3 7 9 5 9-5M12 12v10"/></svg>
+        <span data-i18n="ar">View in your space</span>
+      </button>
+      <div class="progress" slot="progress-bar" id="progress"><span></span></div>
+    </model-viewer>
+  </main>
+
+  <section class="actions">
+    <p class="hint" id="inAppHint" hidden data-i18n="inapp">For augmented reality, open this page in <strong>Safari</strong> or <strong>Chrome</strong>.</p>
+
+    <div class="desk">
+      <img src="/img/qr.svg" alt="QR code to ar.artcollision.ca">
+      <p><strong data-i18n="deskTitle">See it in your space</strong><span data-i18n="deskText">Scan with your phone's camera to place the logo in augmented reality.</span></p>
+    </div>
+
+    <nav class="contact" aria-label="Contact">
+      <a class="chip" href="mailto:candice@artcollision.ca">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+        <span data-i18n="email">Email</span></a>
+      <a class="chip" href="tel:+15819993349">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>
+        <span data-i18n="call">Call</span></a>
+      <a class="chip" href="/candice-dan.vcf" download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M19 8v6M16 11h6"/></svg>
+        <span data-i18n="save">Save contact</span></a>
+    </nav>
+  </section>
+
+  <script>
+    // Simple EN / FR switch based on the phone's language
+    const fr = (navigator.language || "").toLowerCase().startsWith("fr");
+    const T = {
+      role: "Fondatrice &amp; directrice de création",
+      ar: "Voir dans votre espace",
+      inapp: "Pour la réalité augmentée, ouvrez cette page dans <strong>Safari</strong> ou <strong>Chrome</strong>.",
+      deskTitle: "Voyez-le chez vous",
+      deskText: "Scannez avec l'appareil photo de votre téléphone pour placer le logo en réalité augmentée.",
+      email: "Courriel", call: "Appeler", save: "Ajouter aux contacts"
+    };
+    if (fr) {
+      document.documentElement.lang = "fr";
+      document.querySelectorAll("[data-i18n]").forEach(el => { const t = T[el.dataset.i18n]; if (t) el.innerHTML = t; });
+    }
+
+    // In-app browsers (Instagram, Facebook, LinkedIn…) can't open AR: show a hint
+    if (/FBAN|FBAV|FB_IAB|Instagram|LinkedInApp|Snapchat|TikTok|Line\/|MicroMessenger|; wv\)/i.test(navigator.userAgent)) {
+      document.getElementById("inAppHint").hidden = false;
+    }
+
+    // Loading bar
+    const mv = document.getElementById("mv");
+    const bar = document.querySelector("#progress > span");
+    mv.addEventListener("progress", e => {
+      const p = e.detail.totalProgress;
+      bar.style.width = (p * 100) + "%";
+      if (p >= 1) document.getElementById("progress").classList.add("done");
+    });
+    mv.addEventListener("load", () => document.getElementById("progress").classList.add("done"));
+
+    // Keep the whole logo visible on narrow (portrait) screens
+    function fit() {
+      const a = mv.clientWidth / Math.max(1, mv.clientHeight);
+      if (a >= 1) { mv.cameraOrbit = "0deg 84deg auto"; return; }
+      const r = 0.094 / (Math.tan(15 * Math.PI / 180) * a);
+      mv.cameraOrbit = `0deg 84deg ${r.toFixed(3)}m`;
+      mv.maxCameraOrbit = `auto 160deg ${(r * 1.8).toFixed(3)}m`;
+    }
+    fit(); addEventListener("resize", fit);
+  </script>
+</body>
+</html>
