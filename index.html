@@ -132,10 +132,10 @@
       ios-src="/models/ArtCollision_Logo_AR.usdz"
       alt="Art Collision animated 3D logo"
       ar ar-modes="scene-viewer quick-look webxr" ar-scale="auto" ar-placement="floor"
-      camera-controls touch-action="pan-y" interaction-prompt="none"
+      camera-controls disable-zoom touch-action="pan-y" interaction-prompt="none"
       autoplay animation-name="ArtCollision_Loop"
-      camera-orbit="0deg 84deg auto"
-      min-camera-orbit="auto 20deg auto" max-camera-orbit="auto 160deg auto"
+      camera-orbit="0deg 84deg auto" field-of-view="auto"
+      min-camera-orbit="auto 20deg 0.1m" max-camera-orbit="auto 160deg 3m"
       environment-image="neutral" exposure="1.05"
       shadow-intensity="0.6" shadow-softness="1"
       loading="eager" reveal="auto" poster="/img/poster-logo.png">
@@ -215,14 +215,14 @@
     });
 
     // Keep the whole logo visible on narrow (portrait) screens
+    // Keep the whole logo (and its moving rings) inside the screen on every device:
+    // model-viewer frames the whole model automatically; we only zoom in slightly.
     function fit() {
-      const a = mv.clientWidth / Math.max(1, mv.clientHeight);
-      if (a >= 1) { mv.cameraOrbit = "0deg 84deg auto"; return; }
-      const r = 0.094 / (Math.tan(15 * Math.PI / 180) * a);
-      mv.cameraOrbit = `0deg 84deg ${r.toFixed(3)}m`;
-      mv.maxCameraOrbit = `auto 160deg ${(r * 1.8).toFixed(3)}m`;
+      const portrait = mv.clientWidth < mv.clientHeight;
+      mv.cameraOrbit = `0deg 84deg ${portrait ? "128%" : "85%"}`;  // >100% = further away
     }
     fit(); addEventListener("resize", fit);
+    if (window.ResizeObserver) new ResizeObserver(fit).observe(mv);
   </script>
 </body>
 </html>
